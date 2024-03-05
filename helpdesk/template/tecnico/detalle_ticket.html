@@ -1,7 +1,7 @@
 <!-- tu_template_detalle_ticket.html -->
-{% extends 'cliente/dashboard.html' %}
+{% extends 'tecnico/dashboard.html' %}
 
-{% block cliente_section %}
+{% block tecnico_section %}
 
 {% load static %}
 
@@ -9,13 +9,6 @@
 
     <h1>{{ ticket.asunto }}</h1>
     <p>{{ ticket.descripcion }}</p>
-    <div class="adjuntos-container">
-      {% for adjunto in adjuntos %}
-          {% if adjunto %}
-              <a href="{{ adjunto.url }}" target="_blank">{{ adjunto.name }}</a>
-          {% endif %}
-      {% endfor %}
-  </div>
   
     <!-- Mostrar respuestas en forma de chat -->
     <div class="chat-container">

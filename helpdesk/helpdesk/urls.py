@@ -50,6 +50,11 @@ urlpatterns = [
 
 
     path('tec/dashboard', views.tec_dashboard, name='tec_dashboard'),
+    path('tec/profile', views.tec_profile, name='tec_profile'),
+    path('tec/ticket', views.tec_ticket, name='tec_ticket'),
+    path('tec/<int:ticket_id>/', views.tec_detalle_ticket, name='tec_detalle_ticket'),
+    path('tec/<int:ticket_id>/agregar_respuesta/', views.tec_agregar_respuesta, name='tec_agregar_respuesta'),
+
 
 
 ]

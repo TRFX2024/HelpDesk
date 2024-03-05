@@ -87,6 +87,7 @@ def asignar_tecnico(request, ticket_id):
     if request.method == 'POST':
         form = AsignarTecnicoForm(request.POST, instance=ticket)
         if form.is_valid():
+            form.instance.estado = Estado.objects.get(pk=2)
             form.save()
             return redirect('adm_tickets')  # Redirige a la página de éxito
     else:
@@ -184,25 +185,21 @@ def cli_ticket(request):
     return render(request, 'cliente/tickets.html', {'tickets_cliente': tickets_cliente, 'cliente': cliente})
 
 def cli_crear_ticket(request):
-    # Verificar si el usuario es de tipo Administracion o tiene una instancia de Cliente
-    if request.user.groups.filter(name='Administracion').exists() or Cliente.objects.filter(user=request.user).exists():
-        if request.method == 'POST':
-            form = TicketsForm(request.POST, instance=Ticket(cliente=request.user))
-            if form.is_valid():
-                # Configurar el estado 'Nuevo' antes de guardar el ticket
-                form.instance.estado = Estado.objects.get(pk=1)
-                form.instance.num_respuestas = 0
-                form.save()
-                print("Ticket creado exitosamente")
-                return redirect('cli_ticket')  # Redirige a la página de éxito
-            else:
-                print("Formulario no válido. Errores:", form.errors)
+    if request.method == 'POST':
+        form = TicketsForm(request.POST, request.FILES, instance=Ticket(cliente=request.user))
+        if form.is_valid():
+            # Configurar el estado 'Nuevo' antes de guardar el ticket
+            form.instance.estado = Estado.objects.get(pk=1)
+            form.instance.num_respuestas = 0
+            form.save()
+            print("Ticket creado exitosamente")
+            return redirect('cli_ticket')  # Redirige a la página de éxito
         else:
-            form = TicketsForm()
-
-        return render(request, 'cliente/crear_tickets.html', {'form': form})
+            print("Formulario no válido. Errores:", form.errors)
     else:
-        return HttpResponseForbidden("No tienes permisos para acceder a esta página.")
+        form = TicketsForm()
+
+    return render(request, 'cliente/crear_tickets.html', {'form': form})
     
 def cli_agregar_respuesta(request, ticket_id):
     ticket = Ticket.objects.get(pk=ticket_id)
@@ -229,12 +226,57 @@ def cli_detalle_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, pk=ticket_id)
     respuestas = Respuesta.objects.filter(ticket=ticket).order_by('fecha_respuesta')
 
-    return render(request, 'cliente/detalle_ticket.html', {'ticket': ticket, 'respuestas': respuestas})
+    
+    # Pasa los archivos adjuntos al contexto
+    adjuntos = [ticket.adjunto1, ticket.adjunto2]
 
+    return render(request, 'cliente/detalle_ticket.html', {'ticket': ticket, 'respuestas': respuestas, 'adjuntos': adjuntos})
 
 
 
 ##SECCION DE TECNICOS
 def tec_dashboard(request):
-    return render(request, 'tecnico/dashboard.html')
+    return redirect('tec_ticket')
 
+def tec_ticket(request):
+    # Obtener el técnico asociado al usuario logueado
+    tecnico = Tecnico.objects.get(user=request.user)
+
+    # Filtrar los tickets asignados al técnico
+    tickets_tecnico = Ticket.objects.filter(tecnico_asig=tecnico)
+
+    return render(request, 'tecnico/tickets.html', {'tickets_tecnico': tickets_tecnico, 'tecnico': tecnico})
+
+def tec_profile(request):
+    tecnico = request.user
+
+    print(tecnico)
+
+    return render(request, 'tecnico/profile.html', {'tecnico':tecnico})
+
+def tec_detalle_ticket(request, ticket_id):
+    ticket = get_object_or_404(Ticket, pk=ticket_id)
+    respuestas = Respuesta.objects.filter(ticket=ticket).order_by('fecha_respuesta')
+
+    return render(request, 'tecnico/detalle_ticket.html', {'ticket': ticket, 'respuestas': respuestas})
+
+def tec_agregar_respuesta(request, ticket_id):
+    ticket = Ticket.objects.get(pk=ticket_id)
+
+    if request.method == 'POST':
+        form = RespuestaForm(request.POST)
+        if form.is_valid():
+            respuesta = form.save(commit=False)
+            respuesta.ticket = ticket
+            respuesta.tecnico = request.user  # Asigna al usuario actual como técnico
+            respuesta.save()
+
+            ticket.num_respuestas += 1
+            ticket.save()
+
+            messages.success(request, 'Respuesta agregada con éxito.')
+            return redirect('tec_ticket')
+    else:
+        form = RespuestaForm()
+
+    return render(request, 'tecnico/agregar_respuesta.html', {'form': form, 'ticket': ticket})

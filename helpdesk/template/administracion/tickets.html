@@ -15,6 +15,7 @@
               <tr>
                 <th scope="col">Id</th>
                 <th scope="col">Asunto</th>
+                <th scope="col">Cliente</th>
                 <th scope="col">Estado</th>
                 <th scope="col">Respuestas</th>
                 <th scope="col">Tecnico</th>
@@ -26,6 +27,7 @@
                 <tr>
                     <td>{{ ticket.id }}</td>
                     <td><a href="{% url 'detalle_ticket' ticket.id %}">{{ ticket.asunto }}</a></td>
+                    <td>{{ ticket.cliente.first_name }} {{ ticket.cliente.last_name }}</td>
                     <td>{{ ticket.estado.nombre }}</td>
                     <td>{{ ticket.num_respuestas }}</td>
                     <td>{{ ticket.tecnico_asig.user.first_name }} {{ ticket.tecnico_asig.user.last_name }}</td>

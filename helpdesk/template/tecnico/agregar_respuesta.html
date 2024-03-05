@@ -1,0 +1,21 @@
+{% extends 'tecnico/dashboard.html' %}
+
+{% block tecnico_section %}
+
+{% load static %}
+
+<section>
+
+<!-- templates/tu_template_respuesta.html -->
+<h2>Añadir Respuesta</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-outline-dark btn-sm">Agregar Respuesta</button>
+</form>
+
+
+</section>
+
+{% endblock %}
+

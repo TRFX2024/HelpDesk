@@ -40,6 +40,8 @@ class Ticket(models.Model):
     fecha_solucion = models.DateTimeField(null=True, blank=True)
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
     tiempo_dedicado = models.DateTimeField(null=True, blank=True)
+    adjunto1 = models.ImageField(upload_to='adjuntos/', null=True, blank=True)
+    adjunto2 = models.ImageField(upload_to='adjuntos/', null=True, blank=True)
 
 class Respuesta(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
