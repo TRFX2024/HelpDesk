@@ -8,7 +8,7 @@ from django.contrib import messages
 from .forms import ClienteForm, TecnicoForm, TicketsForm, AsignarTecnicoForm, RespuestaForm
 from django.shortcuts import redirect, get_object_or_404
 
-from .models import Administrador, Cliente, Estado, Tecnico, Ticket, Respuesta
+from .models import Adjunto, Administrador, Cliente, Estado, Tecnico, Ticket, Respuesta
 
 # Create your views here.
 @csrf_protect
@@ -61,17 +61,22 @@ def adm_clientes(request):
     return render(request, 'administracion/clientes.html', {'clientes': clientes})
 
 def crear_ticket(request):
-    # Verificar si el usuario es de tipo Administracion o tiene una instancia de Cliente
     if request.user.groups.filter(name='Administracion').exists() or Cliente.objects.filter(user=request.user).exists():
         if request.method == 'POST':
-            form = TicketsForm(request.POST, instance=Ticket(cliente=request.user))
+            form = TicketsForm(request.POST, request.FILES, instance=Ticket(cliente=request.user))
             if form.is_valid():
-                # Configurar el estado 'Nuevo' antes de guardar el ticket
                 form.instance.estado = Estado.objects.get(pk=1)
                 form.instance.num_respuestas = 0
-                form.save()
+                ticket = form.save()
+
+                # Crear o actualizar el modelo Adjunto
+                adjunto, created = Adjunto.objects.get_or_create(ticket=ticket)
+                adjunto.archivo1 = form.cleaned_data['archivo1'].read() if form.cleaned_data['archivo1'] else None
+                adjunto.archivo2 = form.cleaned_data['archivo2'].read() if form.cleaned_data['archivo2'] else None
+                adjunto.save()
+
                 print("Ticket creado exitosamente")
-                return redirect('adm_tickets')  # Redirige a la página de éxito
+                return redirect('adm_tickets')
             else:
                 print("Formulario no válido. Errores:", form.errors)
         else:
@@ -120,7 +125,10 @@ def detalle_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, pk=ticket_id)
     respuestas = Respuesta.objects.filter(ticket=ticket).order_by('fecha_respuesta')
 
-    return render(request, 'administracion/detalle_ticket.html', {'ticket': ticket, 'respuestas': respuestas})
+    # Verificar si hay archivos adjuntos para este ticket
+    adjunto = Adjunto.objects.filter(ticket=ticket).first()
+
+    return render(request, 'administracion/detalle_ticket.html', {'ticket': ticket, 'respuestas': respuestas, 'adjunto': adjunto})
 
 def crear_cliente(request):
     if request.method == 'POST':
@@ -185,21 +193,30 @@ def cli_ticket(request):
     return render(request, 'cliente/tickets.html', {'tickets_cliente': tickets_cliente, 'cliente': cliente})
 
 def cli_crear_ticket(request):
-    if request.method == 'POST':
-        form = TicketsForm(request.POST, request.FILES, instance=Ticket(cliente=request.user))
-        if form.is_valid():
-            # Configurar el estado 'Nuevo' antes de guardar el ticket
-            form.instance.estado = Estado.objects.get(pk=1)
-            form.instance.num_respuestas = 0
-            form.save()
-            print("Ticket creado exitosamente")
-            return redirect('cli_ticket')  # Redirige a la página de éxito
-        else:
-            print("Formulario no válido. Errores:", form.errors)
-    else:
-        form = TicketsForm()
+    if request.user.groups.filter(name='Administracion').exists() or Cliente.objects.filter(user=request.user).exists():
+        if request.method == 'POST':
+            form = TicketsForm(request.POST, request.FILES, instance=Ticket(cliente=request.user))
+            if form.is_valid():
+                form.instance.estado = Estado.objects.get(pk=1)
+                form.instance.num_respuestas = 0
+                ticket = form.save()
 
-    return render(request, 'cliente/crear_tickets.html', {'form': form})
+                # Crear o actualizar el modelo Adjunto
+                adjunto, created = Adjunto.objects.get_or_create(ticket=ticket)
+                adjunto.archivo1 = form.cleaned_data['archivo1'].read() if form.cleaned_data['archivo1'] else None
+                adjunto.archivo2 = form.cleaned_data['archivo2'].read() if form.cleaned_data['archivo2'] else None
+                adjunto.save()
+
+                print("Ticket creado exitosamente")
+                return redirect('cli_ticket')
+            else:
+                print("Formulario no válido. Errores:", form.errors)
+        else:
+            form = TicketsForm()
+
+        return render(request, 'cliente/crear_tickets.html', {'form': form})
+    else:
+        return HttpResponseForbidden("No tienes permisos para acceder a esta página.")
     
 def cli_agregar_respuesta(request, ticket_id):
     ticket = Ticket.objects.get(pk=ticket_id)
@@ -226,13 +243,22 @@ def cli_detalle_ticket(request, ticket_id):
     ticket = get_object_or_404(Ticket, pk=ticket_id)
     respuestas = Respuesta.objects.filter(ticket=ticket).order_by('fecha_respuesta')
 
-    
-    # Pasa los archivos adjuntos al contexto
-    adjuntos = [ticket.adjunto1, ticket.adjunto2]
+    # Verificar si hay archivos adjuntos para este ticket
+    adjunto = Adjunto.objects.filter(ticket=ticket).first()
 
-    return render(request, 'cliente/detalle_ticket.html', {'ticket': ticket, 'respuestas': respuestas, 'adjuntos': adjuntos})
+    return render(request, 'cliente/detalle_ticket.html', {'ticket': ticket, 'respuestas': respuestas, 'adjunto': adjunto})
 
+def download_archivo1(request, ticket_id):
+    adjunto = get_object_or_404(Adjunto, ticket_id=ticket_id)
+    response = HttpResponse(adjunto.archivo1, content_type='application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename=archivo1_{ticket_id}.jpg'
+    return response
 
+def download_archivo2(request, ticket_id):
+    adjunto = get_object_or_404(Adjunto, ticket_id=ticket_id)
+    response = HttpResponse(adjunto.archivo2, content_type='application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename=archivo2_{ticket_id}.jpg'
+    return response
 
 ##SECCION DE TECNICOS
 def tec_dashboard(request):
@@ -275,7 +301,7 @@ def tec_agregar_respuesta(request, ticket_id):
             ticket.save()
 
             messages.success(request, 'Respuesta agregada con éxito.')
-            return redirect('tec_ticket')
+            return redirect('tec_tickets')
     else:
         form = RespuestaForm()
 

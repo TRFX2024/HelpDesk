@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 
 # Create your models here.
@@ -40,8 +41,6 @@ class Ticket(models.Model):
     fecha_solucion = models.DateTimeField(null=True, blank=True)
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
     tiempo_dedicado = models.DateTimeField(null=True, blank=True)
-    adjunto1 = models.ImageField(upload_to='adjuntos/', null=True, blank=True)
-    adjunto2 = models.ImageField(upload_to='adjuntos/', null=True, blank=True)
 
 class Respuesta(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
@@ -49,3 +48,16 @@ class Respuesta(models.Model):
     respuesta = models.TextField(max_length=255)
     fecha_respuesta = models.DateTimeField(auto_now_add=True)
 
+class Adjunto(models.Model):
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
+    archivo1 = models.BinaryField(null=True, blank=True)
+    archivo2 = models.BinaryField(null=True, blank=True)
+
+    def get_archivo1_url(self):
+        return reverse('download_archivo1', args=[str(self.ticket.id)])
+
+    def get_archivo2_url(self):
+        return reverse('download_archivo2', args=[str(self.ticket.id)])
+    
+    def __str__(self):
+        return f'Adjunto de Ticket {self.ticket_id}'

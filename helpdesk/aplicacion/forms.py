@@ -121,12 +121,18 @@ class TicketsForm(forms.ModelForm):
     
     class Meta:
         model = Ticket
-        fields = ['asunto', 'descripcion',  'adjunto1', 'adjunto2']
+        fields = ['asunto', 'descripcion']
+
+        archivo1 = forms.FileField(required=False)
+        archivo2 = forms.FileField(required=False)
 
         widgets = {
             'asunto': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),  # Puedes ajustar el número de filas según tu preferencia
         }
+
+    archivo1 = forms.ImageField(required=False)  # Campo para el primer archivo adjunto
+    archivo2 = forms.ImageField(required=False)  # Campo para el segundo archivo adjunto
 
 class AsignarTecnicoForm(forms.ModelForm):
     tecnico_asig = forms.ModelChoiceField(

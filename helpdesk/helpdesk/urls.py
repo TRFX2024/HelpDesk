@@ -48,6 +48,8 @@ urlpatterns = [
     path('cli/<int:ticket_id>/agregar_respuesta/', views.cli_agregar_respuesta, name='cli_agregar_respuesta'),
     path('cli/<int:ticket_id>/', views.cli_detalle_ticket, name='cli_detalle_ticket'),
 
+    path('download_archivo1/<int:ticket_id>/', views.download_archivo1, name='download_archivo1'),
+    path('download_archivo2/<int:ticket_id>/', views.download_archivo2, name='download_archivo2'),
 
     path('tec/dashboard', views.tec_dashboard, name='tec_dashboard'),
     path('tec/profile', views.tec_profile, name='tec_profile'),

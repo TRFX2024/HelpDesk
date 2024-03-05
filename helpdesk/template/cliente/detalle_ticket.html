@@ -9,13 +9,15 @@
 
     <h1>{{ ticket.asunto }}</h1>
     <p>{{ ticket.descripcion }}</p>
-    <div class="adjuntos-container">
-      {% for adjunto in adjuntos %}
-          {% if adjunto %}
-              <a href="{{ adjunto.url }}" target="_blank">{{ adjunto.name }}</a>
-          {% endif %}
-      {% endfor %}
-  </div>
+    {% if adjunto %}
+      {% if adjunto.archivo1 %}
+        <a href="{% url 'download_archivo1' ticket.id %}"><button type="submit" class="btn btn-outline-dark"><i class="bi bi-cloud-download">  Descargar Adjunto</i></button>
+      {% endif %}
+      
+      {% if adjunto.archivo2 %}
+      <a href="{% url 'download_archivo2' ticket.id %}"><button type="submit" class="btn btn-outline-dark"><i class="bi bi-cloud-download">  Descargar Adjunto</i></button>
+      {% endif %}
+    {% endif %}
   
     <!-- Mostrar respuestas en forma de chat -->
     <div class="chat-container">
