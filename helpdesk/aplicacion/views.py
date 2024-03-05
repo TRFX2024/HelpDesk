@@ -1,14 +1,16 @@
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import redirect, render
+from django.urls import reverse_lazy
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 
-from .forms import ClienteForm, TecnicoForm, TicketsForm, AsignarTecnicoForm, RespuestaForm
+from .forms import ClienteForm, TecnicoForm, TicketsForm, AsignarTecnicoForm, RespuestaForm, CustomPasswordChangeForm, UserProfileForm
 from django.shortcuts import redirect, get_object_or_404
 
 from .models import Adjunto, Administrador, Cliente, Estado, Tecnico, Ticket, Respuesta
+from django.contrib.auth.views import PasswordChangeView
 
 # Create your views here.
 @csrf_protect
@@ -38,6 +40,18 @@ def logout_user(request):
 
 def index(request):
     return redirect('login')
+
+def download_archivo1(request, ticket_id):
+    adjunto = get_object_or_404(Adjunto, ticket_id=ticket_id)
+    response = HttpResponse(adjunto.archivo1, content_type='application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename=archivo1_{ticket_id}.jpg'
+    return response
+
+def download_archivo2(request, ticket_id):
+    adjunto = get_object_or_404(Adjunto, ticket_id=ticket_id)
+    response = HttpResponse(adjunto.archivo2, content_type='application/octet-stream')
+    response['Content-Disposition'] = f'attachment; filename=archivo2_{ticket_id}.jpg'
+    return response
 
 
 ##SECCION DE ADMINISTRACION
@@ -171,6 +185,21 @@ def adm_profile(request):
 
     return render(request, 'administracion/profile.html', {'administrador':administrador})
 
+class CambiarContraseñaView(PasswordChangeView):
+    template_name = 'administracion/cambiar_contraseña.html'
+    form_class = CustomPasswordChangeForm  # Usamos nuestro formulario personalizado
+    success_url = reverse_lazy('adm_profile')
+
+def edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('adm_profile')  # Puedes redirigir a la página de perfil o a donde desees
+    else:
+        form = UserProfileForm(instance=request.user)
+
+    return render(request, 'administracion/edit_profile.html', {'form': form})
 
 ##SECCION DE CLIENTES
 def cli_dashboard(request):
@@ -248,17 +277,21 @@ def cli_detalle_ticket(request, ticket_id):
 
     return render(request, 'cliente/detalle_ticket.html', {'ticket': ticket, 'respuestas': respuestas, 'adjunto': adjunto})
 
-def download_archivo1(request, ticket_id):
-    adjunto = get_object_or_404(Adjunto, ticket_id=ticket_id)
-    response = HttpResponse(adjunto.archivo1, content_type='application/octet-stream')
-    response['Content-Disposition'] = f'attachment; filename=archivo1_{ticket_id}.jpg'
-    return response
+class CliCambiarContraseñaView(PasswordChangeView):
+    template_name = 'cliente/cambiar_contraseña.html'
+    form_class = CustomPasswordChangeForm  # Usamos nuestro formulario personalizado
+    success_url = reverse_lazy('cli_profile')
 
-def download_archivo2(request, ticket_id):
-    adjunto = get_object_or_404(Adjunto, ticket_id=ticket_id)
-    response = HttpResponse(adjunto.archivo2, content_type='application/octet-stream')
-    response['Content-Disposition'] = f'attachment; filename=archivo2_{ticket_id}.jpg'
-    return response
+def cli_edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('cli_profile')  # Puedes redirigir a la página de perfil o a donde desees
+    else:
+        form = UserProfileForm(instance=request.user)
+
+    return render(request, 'cliente/edit_profile.html', {'form': form})
 
 ##SECCION DE TECNICOS
 def tec_dashboard(request):
@@ -306,3 +339,19 @@ def tec_agregar_respuesta(request, ticket_id):
         form = RespuestaForm()
 
     return render(request, 'tecnico/agregar_respuesta.html', {'form': form, 'ticket': ticket})
+
+class TecCambiarContraseñaView(PasswordChangeView):
+    template_name = 'tecnico/cambiar_contraseña.html'
+    form_class = CustomPasswordChangeForm  # Usamos nuestro formulario personalizado
+    success_url = reverse_lazy('tec_profile')
+
+def tec_edit_profile(request):
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('tec_profile')  # Puedes redirigir a la página de perfil o a donde desees
+    else:
+        form = UserProfileForm(instance=request.user)
+
+    return render(request, 'tecnico/edit_profile.html', {'form': form})

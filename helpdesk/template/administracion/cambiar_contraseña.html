@@ -1,0 +1,39 @@
+{% extends 'administracion/dashboard.html' %}
+
+{% block admin_section %}
+
+{% load static %}
+
+<section>
+
+<h2>Cambiar Contraseña</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="id_nombre" class="mt-4">Contraña actual:</label>
+        {{ form.old_password }}
+    </div>
+    <div class="form-group">
+      <label for="exampleFormControlSelect1" class="mt-4">Nueva contraseña:</label>
+      {{ form.new_password1 }}
+    </div>
+    <div class="form-group">
+        <label for="exampleFormControlSelect1" class="mt-4">Confirma nueva contraseña</label>
+        {{ form.new_password2 }}
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-outline-dark mt-5">Cambiar contraseña</button>
+    </div>
+  </form>
+
+  <div class="alert alert-secondary mt-5" role="alert">
+    <p>-Por defecto, la contraseña debe tener al menos 8 caracteres. <br>
+      -La contraseña debe incluir al menos una letra minúscula, una letra mayúscula, un dígito y un carácter especial. <br>
+      -El sistema puede mantener un historial de contraseñas anteriores para evitar que los usuarios vuelvan a utilizar contraseñas recientes. <br>
+      -Al cambiar la contraseña, se requiere ingresar la contraseña actual como medida de seguridad.</p>
+  </div>
+
+</section>
+
+{% endblock %}

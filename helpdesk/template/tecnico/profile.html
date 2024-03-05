@@ -38,11 +38,8 @@
                 <hr>
                 <div class="row">
                   <div class="col-sm-9">
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <center><button type="submit" class="btn btn-outline-dark">Cambiar contraseña</button></center>
-                      </form>
+                    <center><a href="{% url 'tec_cambiar_contraseña' %}"><button type="submit" class="btn btn-outline-dark"><i class="bi bi-pencil-fill">  Cambiar Contraseña</i></button>
+                    <a href="{% url 'tec_edit_profile' %}"><button type="submit" class="btn btn-outline-dark"><i class="bi bi-pencil-fill">  Editar Datos</i></button></center>
                   </div>
                 </div>
               </div>

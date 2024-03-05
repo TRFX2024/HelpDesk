@@ -6,6 +6,9 @@ from django.utils import timezone
 from django import forms
 from .models import Cliente, Estado, Respuesta, Tecnico, Ticket
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import UserChangeForm
+
 
 def generar_username(nombre, apellido):
     # Obtener las dos primeras letras del nombre y del apellido
@@ -152,4 +155,30 @@ class RespuestaForm(forms.ModelForm):
 
         widgets = {
             'respuesta': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),  # Puedes ajustar el número de filas según tu preferencia
+        }
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    old_password = forms.CharField(
+        label="Contraseña Actual",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+    )
+    new_password1 = forms.CharField(
+        label="Nueva Contraseña",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+    )
+    new_password2 = forms.CharField(
+        label="Confirmar Nueva Contraseña",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+    )
+
+class UserProfileForm(UserChangeForm):
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'email']
+
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.TextInput(attrs={'class': 'form-control'}),
+
         }
