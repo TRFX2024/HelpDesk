@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 
 from django import forms
-from .models import Cliente, Tecnico, Ticket
+from .models import Cliente, Estado, Respuesta, Tecnico, Ticket
 from django.contrib.auth.models import User, Group
 
 def generar_username(nombre, apellido):
@@ -41,8 +41,6 @@ class ClienteForm(forms.ModelForm):
         cleaned_data['grupo'] = grupo_cliente
         cleaned_data['username'] = username
         cleaned_data['password'] = make_password(contraseña)
-        return cleaned_data
-
         return cleaned_data
 
     def save(self, commit=True):
@@ -105,19 +103,47 @@ class TecnicoForm(forms.ModelForm):
         fields = ['nombre', 'apellido', 'nivel', 'contraseña']
 
 class TicketsForm(forms.ModelForm):
-    def __init__(self, cliente, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Configurar valores predeterminados
-        self.initial['estado'] = 'Nuevo'
+        self.initial['estado'] = 1  # Configurar el estado "Nuevo" con el ID 1
         self.initial['num_respuestas'] = 0
         self.initial['tecnico_asig'] = None
-        self.initial['fecha_ingreso'] = timezone.now()
         self.initial['fecha_solucion'] = None
-        self.initial['tiempo_dedicado'] = 0
-        # Restringir el campo cliente
-        self.fields['cliente'].widget = forms.HiddenInput()
-        self.fields['cliente'].initial = cliente
+        self.initial['tiempo_dedicado'] = None
+
+    def clean_asunto(self):
+        # Obtener el valor del campo "asunto"
+        asunto = self.cleaned_data.get('asunto')
+        
+        # Convertir el asunto a mayúsculas
+        return asunto.upper()
+    
+    class Meta:
+        model = Ticket
+        fields = ['asunto', 'descripcion']
+
+        widgets = {
+            'asunto': forms.TextInput(attrs={'class': 'form-control'}),
+            'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),  # Puedes ajustar el número de filas según tu preferencia
+        }
+
+class AsignarTecnicoForm(forms.ModelForm):
+    tecnico_asig = forms.ModelChoiceField(
+        queryset=Tecnico.objects.all(),
+        empty_label="Seleccionar técnico",
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
 
     class Meta:
         model = Ticket
-        fields = ['cliente', 'asunto', 'descripcion', 'estado', 'num_respuestas', 'tecnico_asig', 'fecha_ingreso', 'fecha_solucion', 'tiempo_dedicado']
+        fields = ['tecnico_asig']
+
+class RespuestaForm(forms.ModelForm):
+    class Meta:
+        model = Respuesta
+        fields = ['respuesta']
+
+        widgets = {
+            'respuesta': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),  # Puedes ajustar el número de filas según tu preferencia
+        }

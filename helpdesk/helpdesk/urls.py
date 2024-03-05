@@ -37,7 +37,18 @@ urlpatterns = [
     path('eliminar_cliente/<int:cliente_id>/', views.eliminar_cliente, name='eliminar_cliente'),
     path('eliminar_tecnico/<int:tecnico_id>/', views.eliminar_tecnico, name='eliminar_tecnico'),
 
+    path('asignar_tecnico/<int:ticket_id>/', views.asignar_tecnico, name='asignar_tecnico'),
+    path('ticket/<int:ticket_id>/agregar_respuesta/', views.agregar_respuesta, name='agregar_respuesta'),
+    path('ticket/<int:ticket_id>/', views.detalle_ticket, name='detalle_ticket'),
+
     path('cli/dashboard', views.cli_dashboard, name='cli_dashboard'),
+    path('cli/profile', views.cli_profile, name='cli_profile'),
+    path('cli/ticket', views.cli_ticket, name='cli_ticket'),
+    path('cli/create/ticket', views.cli_crear_ticket, name='cli_crear_ticket'),
+    path('cli/<int:ticket_id>/agregar_respuesta/', views.cli_agregar_respuesta, name='cli_agregar_respuesta'),
+    path('cli/<int:ticket_id>/', views.cli_detalle_ticket, name='cli_detalle_ticket'),
+
+
     path('tec/dashboard', views.tec_dashboard, name='tec_dashboard'),
 
 

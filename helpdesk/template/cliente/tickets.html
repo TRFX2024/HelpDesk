@@ -1,12 +1,12 @@
-{% extends 'administracion/dashboard.html' %}
+{% extends 'cliente/dashboard.html' %}
 
-{% block admin_section %}
+{% block cliente_section %}
 
 {% load static %}
 <section id="contenedor-divs">
 
     <div class="agregar_ticket">
-        <h5>Tickets</h5><a class="float-end mb-2" href="{% url 'create_tick' %}"> <center><button type="submit" class="btn btn-outline-dark">Crear Tickets</button></center> </a>
+        <h5>Tickets</h5><a class="float-end mb-2" href="{% url 'cli_crear_ticket' %}"> <center><button type="submit" class="btn btn-outline-dark">Crear Tickets</button></center> </a>
     </div>
 
     <div class="listar_tickets">
@@ -22,21 +22,18 @@
               </tr>
             </thead>
             <tbody>
-                {% for ticket in tickets %}
+                {% for ticket in tickets_cliente %}
                 <tr>
                     <td>{{ ticket.id }}</td>
-                    <td><a href="{% url 'detalle_ticket' ticket.id %}">{{ ticket.asunto }}</a></td>
+                    <td><a href="{% url 'cli_detalle_ticket' ticket.id %}">{{ ticket.asunto }}</a></td>
                     <td>{{ ticket.estado.nombre }}</td>
                     <td>{{ ticket.num_respuestas }}</td>
                     <td>{{ ticket.tecnico_asig.user.first_name }} {{ ticket.tecnico_asig.user.last_name }}</td>
                     <td>
-                        <a href="{% url 'asignar_tecnico' ticket.id %}" class="btn btn-outline-dark btn-sm"><i class="bi bi-person-badge-fill"> Asignar Técnico</i></a>
+                        <a href="{% url 'cli_agregar_respuesta' ticket.id %}" class="btn btn-outline-dark btn-sm"><i class="bi bi-pencil-square"> Añadir Respuesta</i></a>
                     </td>
                     <td>
-                        <a href="{% url 'agregar_respuesta' ticket.id %}" class="btn btn-outline-dark btn-sm"><i class="bi bi-pencil-square"> Añadir Respuesta</i></a>
-                    </td>
-                    <td>
-                        <a href="{% url 'detalle_ticket' ticket.id %}" class="btn btn-outline-dark btn-sm"><i class="bi bi-ticket-detailed"> Ver Detalles</i></a>
+                        <a href="{% url 'cli_detalle_ticket' ticket.id %}" class="btn btn-outline-dark btn-sm"><i class="bi bi-ticket-detailed"> Ver Detalles</i></a>
                     </td>
                 </tr>
                 {% endfor %}

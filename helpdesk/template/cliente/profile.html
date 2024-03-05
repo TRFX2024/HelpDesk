@@ -1,0 +1,60 @@
+{% extends 'cliente/dashboard.html' %}
+
+{% block cliente_section %}
+
+{% load static %}
+<section id="contenedor-divs">
+
+    <div class="datos">
+        <div class="col-lg-6">
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-sm-3">
+                    <p class="mb-0">Nombre: </p>
+                  </div>
+                  <div class="col-sm-9">
+                    <p class="text-muted mb-0">{{ cliente.first_name }} {{ cliente.last_name}} </p>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-3">
+                    <p class="mb-0">Correo:</p>
+                  </div>
+                  <div class="col-sm-9">
+                    <p class="text-muted mb-0">{{ cliente.email }}</p>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-3">
+                    <p class="mb-0">Tipo perfil</p>
+                  </div>
+                  <div class="col-sm-9">
+                    <p class="text-muted mb-0">{% for group in cliente.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-9">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <center><button type="submit" class="btn btn-outline-dark">Cambiar contraseña</button></center>
+                      </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+    </div>
+
+    <div class="ult_tickets">
+
+    </div>
+
+</section>
+
+{% endblock %}
+
+
