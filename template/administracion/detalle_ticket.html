@@ -1,0 +1,33 @@
+<!-- tu_template_detalle_ticket.html -->
+{% extends 'administracion/dashboard.html' %}
+
+{% block admin_section %}
+
+{% load static %}
+
+ <section>
+
+  <h1>{{ ticket.asunto }}</h1>
+  <p>{{ ticket.descripcion }}</p>
+  {% if adjunto %}
+    {% if adjunto.archivo1 %}
+      <a href="{% url 'download_archivo1' ticket.id %}"><button type="submit" class="btn btn-outline-dark"><i class="bi bi-cloud-download">  Descargar Adjunto</i></button>
+    {% endif %}
+    
+    {% if adjunto.archivo2 %}
+    <a href="{% url 'download_archivo2' ticket.id %}"><button type="submit" class="btn btn-outline-dark"><i class="bi bi-cloud-download">  Descargar Adjunto</i></button>
+    {% endif %}
+  {% endif %}
+  
+    <!-- Mostrar respuestas en forma de chat -->
+    <div class="chat-container">
+      {% for respuesta in respuestas %}
+        <div class="mensaje {% if respuesta.tecnico == ticket.cliente %}mensaje-cliente{% else %}mensaje-otro-usuario{% endif %}">
+            <p>{{ respuesta.tecnico }} ({{ respuesta.fecha_respuesta|date:"l, j F Y H:i:s" }})</p>
+            <p>{{ respuesta.respuesta }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+  
+  {% endblock %}
