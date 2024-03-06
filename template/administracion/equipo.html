@@ -1,0 +1,49 @@
+{% extends 'administracion/dashboard.html' %}
+
+{% block admin_section %}
+
+{% load static %}
+<section id="contenedor-divs">
+
+    <div class="agregar_equipo">
+        <h5>Técnicos</h5><a class="float-end mb-2" href="{% url 'create_tec' %}"> <center><button type="submit" class="btn btn-outline-dark">Agregar Técnico</button></center> </a>
+    </div>
+
+    <div class="listar_equipo">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Nombre de Usuario</th>
+                    <th>Correo Electrónico</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>nivel</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for equipo in equipos %}
+                <tr>
+                    <td>{{ equipo.user.username }}</td>
+                    <td>{{ equipo.user.email }}</td>
+                    <td>{{ equipo.user.first_name }}</td>
+                    <td>{{ equipo.user.last_name }}</td>
+                    <td>{{ equipo.nivel }}</td>
+                    <td>
+                        <form action="{% url 'eliminar_tecnico' equipo.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-dark btn-sm"><i class="bi bi-trash3"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        
+        
+
+</section>
+
+{% endblock %}
+
+
