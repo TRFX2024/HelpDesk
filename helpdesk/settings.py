@@ -84,9 +84,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'helpdesk',
-        'USER': 'admin',
-        'PASSWORD': 'Teraf2022.',
-        'HOST': 'porticos.chger7ymel2m.sa-east-1.rds.amazonaws.com',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
         'PORT': '3306',
     }
 }
